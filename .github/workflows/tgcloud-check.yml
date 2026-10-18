@@ -49,4 +49,4 @@ jobs:
           cat out.json
 
           jq -e '.ok == true' out.json > /dev/null
-          jq -c '{price:.result.result.price, triggered:.result.result.triggered, checked:.result.result.checked}' out.json
+          jq -c '{prices:.result.result.prices, errors:.result.result.errors, triggered:.result.result.triggered, checked:.result.result.checked}' out.json
