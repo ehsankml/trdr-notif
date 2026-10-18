@@ -1,0 +1,52 @@
+name: TGCloud gold price check
+
+# زمان‌بند ربات هشدار قیمت طلا (@Trdrnotifbot).
+# tgcloud خودش کرون ندارد، پس این ورک‌فلو هر ۵ دقیقه
+# endpoints/check را روی همان سورس‌های دیپلوی‌شده در کلاد اجرا می‌کند
+# (سورس‌ها از خود کلاد گرفته می‌شوند، پس هیچ drift‌ای نسبت به نسخه
+# دیپلوی‌شده وجود ندارد).
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tgcloud-check
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Run endpoints/check on the tgcloud bot
+        env:
+          TGCLOUD_TOKEN: ${{ secrets.TGCLOUD_TOKEN }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          set -euo pipefail
+          APP_ID="${TGCLOUD_TOKEN%%:*}"
+          BASE="https://cloud.telegram.org/${APP_ID}/manage"
+
+          # 1) deployed sources straight from the cloud (no drift)
+          curl -sS -f -H "Authorization: Bearer ${TGCLOUD_TOKEN}" "${BASE}/get" -o get.json
+          jq -e '.ok == true' get.json > /dev/null
+
+          # 2) run the price-check endpoint with those sources
+          jq --arg s "${CRON_SECRET}" \
+            '{module:"endpoints/check", sources:.result.canonical_modules, args:{secret:$s}, ctx:{}}' \
+            get.json > run.json
+
+          code=$(curl -sS -o out.json -w '%{http_code}' -X POST "${BASE}/run" \
+            -H "Authorization: Bearer ${TGCLOUD_TOKEN}" \
+            -H 'Content-Type: application/json' \
+            -d @run.json)
+          echo "http ${code}"
+          cat out.json
+
+          jq -e '.ok == true' out.json > /dev/null
+          jq -c '{price:.result.result.price, triggered:.result.result.triggered, checked:.result.result.checked}' out.json
