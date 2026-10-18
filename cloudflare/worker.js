@@ -1,6 +1,6 @@
 // Cloudflare Worker — زمان‌بند چک قیمت ربات @Trdrnotifbot (tgcloud)
 //
-// cron trigger: دقیقه‌های ۱،۶،۱۱،… هر ۵ دقیقه (با ورک‌فلوی گیت‌هاب تداخل نکند)
+// cron trigger: دقیقه‌های ۴،۹،۱۴،… (یک دقیقه قبل از دقیقه‌های رُند) هر ۵ دقیقه (با ورک‌فلوی گیت‌هاب تداخل نکند)
 // رازها (Worker secrets): TGCLOUD_TOKEN، CRON_SECRET
 // تست دستی: POST به آدرس ورکر با هدر x-cron-key: <CRON_SECRET>
 //
