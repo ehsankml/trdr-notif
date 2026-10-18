@@ -19,7 +19,7 @@ sudo chmod 600 /etc/tgcloud-goldcheck.env
 sudo /usr/local/bin/tgcloud-goldcheck          # تست دستی
 
 # کرون: دقیقه‌های ۱،۶،۱۱،... تا با ورک‌فلوی گیت‌هاب هم‌زمان نشود
-( crontab -l 2>/dev/null; echo '1-59/5 * * * * /usr/local/bin/tgcloud-goldcheck >>/var/log/tgcloud-goldcheck.log 2>&1' ) | crontab -
+( crontab -l 2>/dev/null; echo '4-59/5 * * * * /usr/local/bin/tgcloud-goldcheck >>/var/log/tgcloud-goldcheck.log 2>&1' ) | crontab -
 ```
 
 نیاز: `curl` + (`jq` یا `python3`).
